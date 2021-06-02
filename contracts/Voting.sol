@@ -17,15 +17,18 @@ contract Voting {
         address candidateAddress;
         bool hasVoted;
     }
+    mapping(address => Voter) public voters;
 
     struct Candidate {
         string name;
+        bytes32 electionName;
         address candidateAddress;
         bool isRegisted;
     }
+    mapping(address => Candidate) public candidates;
 
     struct Election {
-        string name;
+        bytes32 name;
         uint registrationDeadline; // In seconds
         uint votingDeadline; // In seconds
         uint endingTime; // In seconds
@@ -35,12 +38,12 @@ contract Voting {
         mapping(address => Voter) voters;
     }
     mapping(uint => Election) public elections;
-    mapping(string => uint) private electionNameMap;
-    string[] electionList;
+    mapping(bytes32 => uint) private electionNameMap;
+    bytes32[] electionList;
 
     uint electionIndex;
 
-    function newElection(string memory _name, uint _registrationDeadline, uint _votingDeadline, uint _endingTime) public {
+    function newElection(bytes32 _name, uint _registrationDeadline, uint _votingDeadline, uint _endingTime) public {
         for (uint i = 0; i < electionList.length; i++) {
             require(
                 keccak256(abi.encodePacked(electionList[i])) != keccak256(abi.encodePacked(_name)), 
@@ -61,13 +64,13 @@ contract Voting {
         electionIndex++;
     }
 
-    function getElectionCandidate(string memory electionName, address candidateAddress) public view returns (Candidate memory) {
+    function getElectionCandidate(bytes32 electionName, address candidateAddress) public view returns (Candidate memory) {
         Election storage e = elections[electionNameMap[electionName]];
 
         return(e.candidates[candidateAddress]);
     }
 
-    function getElectionCandidates(string memory electionName) public view returns (Candidate[] memory) {
+    function getElectionCandidates(bytes32 electionName) public view returns (Candidate[] memory) {
         Election storage e = elections[electionNameMap[electionName]];
         uint256 candidateCount;
 
@@ -87,24 +90,29 @@ contract Voting {
         return result;
     }
 
-    function registerCandidate(string memory electionName, string memory candidateName) public {
+    function registerCandidate(bytes32 electionName, string memory candidateName) public {
         uint index = electionNameMap[electionName];
-
-        require(keccak256(abi.encodePacked(electionList[index])) == keccak256(abi.encodePacked(electionName)), 'No election with that name found.');
-
         Election storage e = elections[index];
 
-        require(e.candidates[msg.sender].isRegisted != true, 'Candidate already registered.');
-
+        require(keccak256(abi.encodePacked(electionList[index])) == keccak256(abi.encodePacked(electionName)), 'No election with that name found.');
         require(block.timestamp <= e.registrationDeadline, 'Registration period has ended.');
+        require(candidates[msg.sender].electionName == electionName, 'Candidate already registered for that election.');
+        
+        Candidate memory c = Candidate(candidateName, electionName, msg.sender, true);
 
-        Candidate memory c = Candidate(candidateName, msg.sender, true);
+        // Election storage e = elections[index];
 
-        e.candidateList.push(msg.sender);
-        e.candidates[msg.sender] = c;
+        // require(e.candidates[msg.sender].isRegisted != true, 'Candidate already registered.');
+
+        
+
+        // Candidate memory c = Candidate(candidateName, msg.sender, true);
+
+        //e.candidateList.push(msg.sender);
+        candidates[msg.sender] = c;
     }
 
-    function removeCandidate(string memory electionName, address canditateAddress) public {
+    function removeCandidate(bytes32 electionName, address canditateAddress) public {
         uint index = electionNameMap[electionName];
 
         require(keccak256(abi.encodePacked(electionList[index])) == keccak256(abi.encodePacked(electionName)), 'No election with that name found.');
@@ -114,7 +122,7 @@ contract Voting {
         delete e.candidates[canditateAddress];
     }
 
-    function vote(string memory electionName, address canditateAddress) public {
+    function vote(bytes32 electionName, address canditateAddress) public {
         uint index = electionNameMap[electionName];
 
         require(keccak256(abi.encodePacked(electionList[index])) == keccak256(abi.encodePacked(electionName)), 'No election with that name found.');
