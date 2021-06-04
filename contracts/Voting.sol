@@ -20,10 +20,9 @@ contract Voting {
     mapping(address => Voter) public voters;
 
     struct Candidate {
-        string name;
+        bytes32 name;
         bytes32 electionName;
         address candidateAddress;
-        bool isRegisted;
     }
     mapping(address => Candidate) public candidates;
 
@@ -47,7 +46,7 @@ contract Voting {
         for (uint i = 0; i < electionList.length; i++) {
             require(
                 keccak256(abi.encodePacked(electionList[i])) != keccak256(abi.encodePacked(_name)), 
-                'Election with that name already exists'
+                'Election with that name already exists.'
             );
         }
 
@@ -90,25 +89,16 @@ contract Voting {
         return result;
     }
 
-    function registerCandidate(bytes32 electionName, string memory candidateName) public {
+    function registerCandidate(bytes32 electionName, bytes32 candidateName) public {
         uint index = electionNameMap[electionName];
         Election storage e = elections[index];
 
         require(keccak256(abi.encodePacked(electionList[index])) == keccak256(abi.encodePacked(electionName)), 'No election with that name found.');
         require(block.timestamp <= e.registrationDeadline, 'Registration period has ended.');
-        require(candidates[msg.sender].electionName == electionName, 'Candidate already registered for that election.');
+        require(candidates[msg.sender].electionName != electionName, 'Candidate already registered for that election.');
         
-        Candidate memory c = Candidate(candidateName, electionName, msg.sender, true);
+        Candidate memory c = Candidate(candidateName, electionName, msg.sender);
 
-        // Election storage e = elections[index];
-
-        // require(e.candidates[msg.sender].isRegisted != true, 'Candidate already registered.');
-
-        
-
-        // Candidate memory c = Candidate(candidateName, msg.sender, true);
-
-        //e.candidateList.push(msg.sender);
         candidates[msg.sender] = c;
     }
 

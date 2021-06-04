@@ -73,9 +73,9 @@
 				"name": "candidates",
 				"outputs": [
 					{
-						"internalType": "string",
+						"internalType": "bytes32",
 						"name": "name",
-						"type": "string"
+						"type": "bytes32"
 					},
 					{
 						"internalType": "bytes32",
@@ -86,11 +86,6 @@
 						"internalType": "address",
 						"name": "candidateAddress",
 						"type": "address"
-					},
-					{
-						"internalType": "bool",
-						"name": "isRegisted",
-						"type": "bool"
 					}
 				],
 				"stateMutability": "view",
@@ -148,9 +143,9 @@
 					{
 						"components": [
 							{
-								"internalType": "string",
+								"internalType": "bytes32",
 								"name": "name",
-								"type": "string"
+								"type": "bytes32"
 							},
 							{
 								"internalType": "bytes32",
@@ -161,11 +156,6 @@
 								"internalType": "address",
 								"name": "candidateAddress",
 								"type": "address"
-							},
-							{
-								"internalType": "bool",
-								"name": "isRegisted",
-								"type": "bool"
 							}
 						],
 						"internalType": "struct Voting.Candidate",
@@ -189,9 +179,9 @@
 					{
 						"components": [
 							{
-								"internalType": "string",
+								"internalType": "bytes32",
 								"name": "name",
-								"type": "string"
+								"type": "bytes32"
 							},
 							{
 								"internalType": "bytes32",
@@ -202,11 +192,6 @@
 								"internalType": "address",
 								"name": "candidateAddress",
 								"type": "address"
-							},
-							{
-								"internalType": "bool",
-								"name": "isRegisted",
-								"type": "bool"
 							}
 						],
 						"internalType": "struct Voting.Candidate[]",
@@ -253,9 +238,9 @@
 						"type": "bytes32"
 					},
 					{
-						"internalType": "string",
+						"internalType": "bytes32",
 						"name": "candidateName",
-						"type": "string"
+						"type": "bytes32"
 					}
 				],
 				"name": "registerCandidate",
@@ -357,11 +342,11 @@
 	},
 	"sources": {
 		"contracts/Voting.sol": {
-			"keccak256": "0x1102425b3705d33404b07ea34255b402d13fcb1d7ab5c8ad1195b0720002c9f3",
+			"keccak256": "0x0adc0b30fb93b078dd3cdae51ba7b73fb01707e916aef583464ace1be2f968dc",
 			"license": "GPL-3.0",
 			"urls": [
-				"bzz-raw://b44be0aff309ab2724df250489c11499467558848b2fbf871c2cfba46d22e1e2",
-				"dweb:/ipfs/QmdoSjYAnGK7v2YdhU7rkYuhwS9S7W7JSXBXBEYoXr7W6s"
+				"bzz-raw://1631fdd6cf1ed16e17865be57f42fbb745508d51926318ff0eee55515f0670a4",
+				"dweb:/ipfs/QmbQRxknVHhfHWezJ1Csxt7eAJNCMr79rTMRw4rZ5eCseD"
 			]
 		}
 	},

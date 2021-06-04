@@ -4,7 +4,7 @@ contract('Voting', accounts => {
   before(async () => {
     instance = await Voting.deployed();
     originalBlock = await web3.eth.getBlock('latest');
-    electionName = web3.utils.utf8ToHex("test");
+    electionName = web3.utils.toHex('test');
     registrationDeadline = 60, votingDeadline = 120, endingTime = 240;
     await instance.newElection(electionName, registrationDeadline, votingDeadline, endingTime, { from: accounts[0] });
   });
@@ -38,17 +38,42 @@ contract('Voting', accounts => {
       }
 
       assert.isOk(err instanceof Error);
-      assert.equal(err.reason, 'Election with that name already exists');
+      assert.equal(err.reason, 'Election with that name already exists.');
     });
   });
 
   describe('registerCandidate', async () => {
+    // before(async () => {
+    //   instance = await Voting.deployed();
+    //   electionName = web3.utils.toHex('test');
+    //   registrationDeadline = 60, votingDeadline = 120, endingTime = 240;
+    //   await instance.newElection(electionName, registrationDeadline, votingDeadline, endingTime, { from: accounts[0] });
+    // });
+
     it('registers a candidate to a given election', async () => {
-      await instance.registerCandidate(electionName, "Bob", { from: accounts[0] });
+      const electionName = web3.utils.toHex('test');
+      const candidateName = web3.utils.toHex('Bob');
+      await instance.registerCandidate(electionName, candidateName, { from: accounts[0] });
       const election = await instance.elections(0);
-      const candidates = await election.candidates
-      console.log(candidates)
-      assert(election.candidates[accounts[0]]);
-    })
+      const candidate = await instance.candidates(accounts[0]);
+
+      assert.isOk(candidate);
+      assert.strictEqual(web3.utils.hexToUtf8(candidate.electionName), web3.utils.hexToUtf8(electionName));
+    });
+
+    it('errors if the election does not exist', async () => {
+      const otherElectionName = web3.utils.toHex('other');
+      const candidateName = web3.utils.toHex('Bob');
+
+      try {
+        await instance.registerCandidate(otherElectionName, candidateName, { from: accounts[0] });
+      } catch(error) {
+        err = error
+      }
+
+      assert.isOk(err instanceof Error);
+      assert.equal(err.reason, 'No election with that name found.');
+    });
+
   })
 });
