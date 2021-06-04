@@ -1,4 +1,5 @@
 const Voting = artifacts.require('Voting');
+const { time } = require('@openzeppelin/test-helpers');
 
 contract('Voting', accounts => {
   before(async () => {
@@ -43,13 +44,6 @@ contract('Voting', accounts => {
   });
 
   describe('registerCandidate', async () => {
-    // before(async () => {
-    //   instance = await Voting.deployed();
-    //   electionName = web3.utils.toHex('test');
-    //   registrationDeadline = 60, votingDeadline = 120, endingTime = 240;
-    //   await instance.newElection(electionName, registrationDeadline, votingDeadline, endingTime, { from: accounts[0] });
-    // });
-
     it('registers a candidate to a given election', async () => {
       const electionName = web3.utils.toHex('test');
       const candidateName = web3.utils.toHex('Bob');
@@ -75,5 +69,35 @@ contract('Voting', accounts => {
       assert.equal(err.reason, 'No election with that name found.');
     });
 
+    it('errors if the registration period has ended', async () => {
+      time.increase(registrationDeadline + 10);
+
+      const electionName = web3.utils.toHex('test');
+      const candidateName = web3.utils.toHex('Bob');
+
+      try {
+        await instance.registerCandidate(electionName, candidateName, { from: accounts[0] });
+      } catch(error) {
+        err = error
+      };
+
+      assert.isOk(err instanceof Error);
+      assert.equal(err.reason, 'Registration period has ended.');
+    });
+
+    it('errors if the candidate has already registered to that election', async () => {
+      const electionName = web3.utils.toHex('test');
+      const candidateName = web3.utils.toHex('Bob');
+      await instance.registerCandidate(electionName, candidateName, { from: accounts[0] });
+
+      try {
+        await instance.registerCandidate(electionName, candidateName, { from: accounts[0] });
+      } catch(error) {
+        err = error
+      };
+
+      assert.isOk(err instanceof Error);
+      assert.equal(err.reason, 'Candidate already registered for that election.');
+    });
   })
 });
