@@ -2,14 +2,15 @@ const Voting = artifacts.require('Voting');
 const { time } = require('@openzeppelin/test-helpers');
 
 contract('Voting', accounts => {
-  before(async () => {
+  const deploy = async () => {
     instance = await Voting.new();
     registrationDeadline = 60, votingDeadline = 120, endingTime = 240;
-  })
+  }
 
   describe('newElection', async () => {
-    before(async () => {
-      electionName = web3.utils.toHex('test election 1');
+    beforeEach(async () => {
+      await deploy()
+      electionName = web3.utils.toHex('test election');
       await instance.newElection(electionName, registrationDeadline, votingDeadline, endingTime, { from: accounts[0] });
 
       originalBlock = await time.latest()
@@ -48,8 +49,9 @@ contract('Voting', accounts => {
   });
 
   describe('registerCandidate', async () => {
-    before(async () => {
-      electionName = web3.utils.toHex('test election 2');
+    beforeEach(async () => {
+      await deploy()
+      electionName = web3.utils.toHex('test election');
       await instance.newElection(electionName, registrationDeadline, votingDeadline, endingTime, { from: accounts[0] });
     })
 
@@ -111,9 +113,18 @@ contract('Voting', accounts => {
     });
   });
 
+  describe('getElectionCandidates', () => {
+    beforeEach(async () => {
+      await deploy()
+      electionName = web3.utils.toHex('test election');
+      await instance.newElection(electionName, registrationDeadline, votingDeadline, endingTime, { from: accounts[0] });
+    })
+  })
+
   describe('remmoveCandidate', () => {
-    before(async () => {
-      electionName = web3.utils.toHex('test election 3');
+    beforeEach(async () => {
+      await deploy()
+      electionName = web3.utils.toHex('test election');
       candidateName = web3.utils.toHex('Bob');
       await instance.newElection(electionName, registrationDeadline, votingDeadline, endingTime, { from: accounts[0] });
     })
