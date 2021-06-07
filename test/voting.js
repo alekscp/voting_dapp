@@ -87,8 +87,10 @@ contract('Voting', accounts => {
     });
 
     it('errors if the candidate has already registered to that election', async () => {
-      const electionName = web3.utils.toHex('test');
+      const electionName = web3.utils.toHex('other test');
       const candidateName = web3.utils.toHex('Bob');
+
+      await instance.newElection(electionName, registrationDeadline, votingDeadline, endingTime, { from: accounts[0] });
       await instance.registerCandidate(electionName, candidateName, { from: accounts[0] });
 
       try {
