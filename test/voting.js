@@ -3,15 +3,18 @@ const { time } = require('@openzeppelin/test-helpers');
 
 contract('Voting', accounts => {
   before(async () => {
-    instance = await Voting.deployed();
-    electionName = web3.utils.toHex('test');
+    instance = await Voting.new();
     registrationDeadline = 60, votingDeadline = 120, endingTime = 240;
-    await instance.newElection(electionName, registrationDeadline, votingDeadline, endingTime, { from: accounts[0] });
-
-    originalBlock = await time.latest()
-  });
+  })
 
   describe('newElection', async () => {
+    before(async () => {
+      electionName = web3.utils.toHex('test election 1');
+      await instance.newElection(electionName, registrationDeadline, votingDeadline, endingTime, { from: accounts[0] });
+
+      originalBlock = await time.latest()
+    });
+
     it('creates an election', async () => {
       const election = await instance.elections(0);
       assert.exists(election.name);
@@ -45,8 +48,12 @@ contract('Voting', accounts => {
   });
 
   describe('registerCandidate', async () => {
+    before(async () => {
+      electionName = web3.utils.toHex('test election 2');
+      await instance.newElection(electionName, registrationDeadline, votingDeadline, endingTime, { from: accounts[0] });
+    })
+
     it('registers a candidate to a given election', async () => {
-      const electionName = web3.utils.toHex('test');
       const candidateName = web3.utils.toHex('Bob');
       await instance.registerCandidate(electionName, candidateName, { from: accounts[0] });
       const election = await instance.elections(0);
@@ -73,7 +80,7 @@ contract('Voting', accounts => {
     it('errors if the registration period has ended', async () => {
       time.increase(registrationDeadline + 10);
 
-      const electionName = web3.utils.toHex('test');
+      // const electionName = web3.utils.toHex('test');
       const candidateName = web3.utils.toHex('Bob');
 
       try {
@@ -103,4 +110,28 @@ contract('Voting', accounts => {
       assert.equal(err.reason, 'Candidate already registered for that election.');
     });
   });
+
+  describe('remmoveCandidate', () => {
+    before(async () => {
+      electionName = web3.utils.toHex('test election 3');
+      await instance.newElection(electionName, registrationDeadline, votingDeadline, endingTime, { from: accounts[0] });
+    })
+
+    it('removes a candidate from a given election', async () => {
+      const candidateName = web3.utils.toHex('Bob');
+      const candidateAddress = accounts[0]
+      const nonCandidateAddress = accounts[1]
+
+      await instance.registerCandidate(electionName, candidateName, { from: accounts[0] });
+      await instance.removeCandidate(electionName, candidateAddress)
+
+      const candidate = await instance.candidates(candidateAddress)
+
+      assert.equal(candidate.candidateAddress, 0)
+    })
+
+    it('errors if another account tries to remove a candidate', () => {
+
+    })
+  })
 });
