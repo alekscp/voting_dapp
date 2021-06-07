@@ -103,13 +103,15 @@ contract Voting {
     }
 
     function removeCandidate(bytes32 electionName, address canditateAddress) public {
-        uint index = electionNameMap[electionName];
-
-        require(keccak256(abi.encodePacked(electionList[index])) == keccak256(abi.encodePacked(electionName)), 'No election with that name found.');
-
-        Election storage e = elections[index];
-
-        delete e.candidates[canditateAddress];
+        require(msg.sender == canditateAddress, 'Only candidate can remove himself/herself from an election.');
+        
+        Candidate memory c = candidates[msg.sender];
+        
+        if (c.electionName == electionName) {
+            delete candidates[msg.sender];
+        } else {
+            revert("This candidate is not registered in that election.");
+        }
     }
 
     function vote(bytes32 electionName, address canditateAddress) public {

@@ -4,10 +4,11 @@ const { time } = require('@openzeppelin/test-helpers');
 contract('Voting', accounts => {
   before(async () => {
     instance = await Voting.deployed();
-    originalBlock = await web3.eth.getBlock('latest');
     electionName = web3.utils.toHex('test');
     registrationDeadline = 60, votingDeadline = 120, endingTime = 240;
     await instance.newElection(electionName, registrationDeadline, votingDeadline, endingTime, { from: accounts[0] });
+
+    originalBlock = await time.latest()
   });
 
   describe('newElection', async () => {
@@ -18,17 +19,17 @@ contract('Voting', accounts => {
 
     it('sets registrationDeadline relative to current block timestamp', async () => {
       const election = await instance.elections(0);
-      assert.strictEqual(election.registrationDeadline.toNumber(), originalBlock.timestamp + registrationDeadline);
+      assert.strictEqual(election.registrationDeadline.toNumber(), originalBlock.toNumber() + registrationDeadline);
     });
 
     it('sets votingDeadline relative to current block timestamp', async () => {
       const election = await instance.elections(0);
-      assert.strictEqual(election.votingDeadline.toNumber(), originalBlock.timestamp + votingDeadline);
+      assert.strictEqual(election.votingDeadline.toNumber(), originalBlock.toNumber() + votingDeadline);
     });
 
     it('sets endingTime relative to current block timestamp', async () => {
       const election = await instance.elections(0);
-      assert.strictEqual(election.endingTime.toNumber(), originalBlock.timestamp + endingTime);
+      assert.strictEqual(election.endingTime.toNumber(), originalBlock.toNumber() + endingTime);
     });
 
     it('should NOT create an election if name is already taken', async () => {
@@ -99,5 +100,5 @@ contract('Voting', accounts => {
       assert.isOk(err instanceof Error);
       assert.equal(err.reason, 'Candidate already registered for that election.');
     });
-  })
+  });
 });
