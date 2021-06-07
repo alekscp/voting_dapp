@@ -18,6 +18,7 @@ contract Voting {
         bool hasVoted;
     }
     mapping(address => Voter) public voters;
+    address[] voterList;
 
     struct Candidate {
         bytes32 name;
@@ -25,16 +26,13 @@ contract Voting {
         address candidateAddress;
     }
     mapping(address => Candidate) public candidates;
+    address[] candidateList;
 
     struct Election {
         bytes32 name;
         uint registrationDeadline; // In seconds
         uint votingDeadline; // In seconds
         uint endingTime; // In seconds
-        address[] candidateList;
-        address[] voterList;
-        mapping(address => Candidate) candidates;
-        mapping(address => Voter) voters;
     }
     mapping(uint => Election) public elections;
     mapping(bytes32 => uint) private electionNameMap;
@@ -63,27 +61,31 @@ contract Voting {
         electionIndex++;
     }
 
+/*
     function getElectionCandidate(bytes32 electionName, address candidateAddress) public view returns (Candidate memory) {
         Election storage e = elections[electionNameMap[electionName]];
 
         return(e.candidates[candidateAddress]);
     }
+*/
 
     function getElectionCandidates(bytes32 electionName) public view returns (Candidate[] memory) {
-        Election storage e = elections[electionNameMap[electionName]];
+        //Election storage e = elections[electionNameMap[electionName]];
         uint256 candidateCount;
 
-        // Determine number of candidates in an Election
-        for (uint i = 0; i < e.candidateList.length; i++) {
+        // Determine total number of candidates
+        for (uint i = 0; i < candidateList.length; i++) {
             candidateCount++;
         }
 
         // Create fixed length array to store all the candidates
         Candidate[] memory result = new Candidate[](candidateCount);
 
-        // Fill in the result array with all the candidates
-        for (uint i = 0; i < e.candidateList.length; i++) {
-            result[i] = (e.candidates[e.candidateList[i]]);
+        // Fill in the result array with all the candidates from a given election
+        for (uint i = 0; i < candidateList.length; i++) {
+            Candidate storage c = candidates[candidateList[i]];
+            
+            if (c.electionName == electionName) { result[i] = (candidates[candidateList[i]]); }
         }
 
         return result;
@@ -94,12 +96,13 @@ contract Voting {
         Election storage e = elections[index];
 
         require(keccak256(abi.encodePacked(electionList[index])) == keccak256(abi.encodePacked(electionName)), 'No election with that name found.');
-        require(block.timestamp <= e.registrationDeadline, 'Registration period has ended.');
+        require(block.timestamp < e.registrationDeadline, 'Registration period has ended.');
         require(candidates[msg.sender].electionName != electionName, 'Candidate already registered for that election.');
         
         Candidate memory c = Candidate(candidateName, electionName, msg.sender);
 
         candidates[msg.sender] = c;
+        candidateList.push(msg.sender);
     }
 
     function removeCandidate(bytes32 electionName, address canditateAddress) public {
@@ -114,22 +117,26 @@ contract Voting {
         }
     }
 
-    function vote(bytes32 electionName, address canditateAddress) public {
+    function vote(bytes32 electionName, address candidateAddress) public returns (bool) {
         uint index = electionNameMap[electionName];
 
-        require(keccak256(abi.encodePacked(electionList[index])) == keccak256(abi.encodePacked(electionName)), 'No election with that name found.');
+        require(electionList[index] == electionName, 'No election with that name found.');
 
         Election storage e = elections[index];
 
-        require(block.timestamp <= e.endingTime, 'Election has already ended.');
-        require(block.timestamp <= e.votingDeadline, 'Voting period is over.');
-        require(block.timestamp <= e.registrationDeadline && block.timestamp >= e.votingDeadline, 'Candidates are still registering.');
+        require(block.timestamp < e.endingTime, 'Election has already ended.');
+        require(block.timestamp < e.votingDeadline, 'Voting period is over.');
+        require(block.timestamp < e.registrationDeadline, 'Candidates are still registering.');
+        
+        Voter storage v = voters[msg.sender];
 
-        require(e.voters[msg.sender].hasVoted != true, 'Voter has already voted.');
+        require(v.hasVoted != true, 'Voter has already voted.');
 
-        Voter memory v = Voter(msg.sender, canditateAddress, true);
-
-        e.voters[msg.sender] = v;
+        v.voterAddress = msg.sender;
+        v.candidateAddress = candidateAddress;
+        v.hasVoted = true;
+        
+        return true;
     }
 
 }

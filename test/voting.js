@@ -80,9 +80,8 @@ contract('Voting', accounts => {
     });
 
     it('errors if the registration period has ended', async () => {
-      time.increase(registrationDeadline + 10);
+      await time.increase(registrationDeadline);
 
-      // const electionName = web3.utils.toHex('test');
       const candidateName = web3.utils.toHex('Bob');
 
       try {
@@ -97,7 +96,7 @@ contract('Voting', accounts => {
 
     it('errors if the candidate has already registered to that election', async () => {
       const electionName = web3.utils.toHex('other test');
-      const candidateName = web3.utils.toHex('Bob');
+      const candidateName = web3.utils.toHex('bob');
 
       await instance.newElection(electionName, registrationDeadline, votingDeadline, endingTime, { from: accounts[0] });
       await instance.registerCandidate(electionName, candidateName, { from: accounts[0] });
@@ -117,11 +116,20 @@ contract('Voting', accounts => {
     beforeEach(async () => {
       await deploy()
       electionName = web3.utils.toHex('test election');
+      const [candidate1, candidate2, candidate3] = accounts
       await instance.newElection(electionName, registrationDeadline, votingDeadline, endingTime, { from: accounts[0] });
+      await instance.registerCandidate(electionName, web3.utils.toHex('Candidate 1'), { from: candidate1 })
+      await instance.registerCandidate(electionName, web3.utils.toHex('Candidate 2'), { from: candidate2 })
+      await instance.registerCandidate(electionName, web3.utils.toHex('Candidate 3'), { from: candidate3 })
+    })
+
+    it('returns an array containing all the candidates', async () => {
+      const candidates = await instance.getElectionCandidates(electionName)
+      assert(candidates.length >= 3)
     })
   })
 
-  describe('remmoveCandidate', () => {
+  describe('removeCandidate', () => {
     beforeEach(async () => {
       await deploy()
       electionName = web3.utils.toHex('test election');
@@ -166,6 +174,41 @@ contract('Voting', accounts => {
 
       assert.isOk(err instanceof Error);
       assert.equal(err.reason, 'This candidate is not registered in that election.');
+    })
+  })
+
+  describe('vote', () => {
+    beforeEach(async () => {
+      await deploy()
+      electionName = web3.utils.toHex('test election');
+      candidateName1 = web3.utils.toHex('Bob');
+      candidateName2 = web3.utils.toHex('Bob');
+      candidateName3 = web3.utils.toHex('Bob');
+
+      [candidate1, candidate2, candidate3, voter1, voter2, voter3, voter4] = accounts
+      await instance.newElection(electionName, registrationDeadline, votingDeadline, endingTime, { from: accounts[0] });
+
+      await instance.registerCandidate(electionName, candidateName1, { from: candidate1 })
+      await instance.registerCandidate(electionName, candidateName2, { from: candidate2 })
+      await instance.registerCandidate(electionName, candidateName3, { from: candidate3 })
+    })
+
+    it('registers a vote', async () => {
+      const vote = await instance.vote(electionName, candidate1, { from: voter1 })
+      assert.isOk(vote)
+    })
+
+    it('errors if election has already ended', async () => {
+      await time.increase(registrationDeadline)
+
+      try {
+        await instance.vote(electionName, candidate1, { from: voter1 })
+      } catch(error) {
+        err = error
+      }
+
+      assert.isOk(err instanceof Error);
+      assert.equal(err.reason, 'Candidates are still registering.');
     })
   })
 });
