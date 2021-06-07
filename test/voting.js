@@ -114,11 +114,11 @@ contract('Voting', accounts => {
   describe('remmoveCandidate', () => {
     before(async () => {
       electionName = web3.utils.toHex('test election 3');
+      candidateName = web3.utils.toHex('Bob');
       await instance.newElection(electionName, registrationDeadline, votingDeadline, endingTime, { from: accounts[0] });
     })
 
     it('removes a candidate from a given election', async () => {
-      const candidateName = web3.utils.toHex('Bob');
       const candidateAddress = accounts[0]
       const nonCandidateAddress = accounts[1]
 
@@ -130,8 +130,31 @@ contract('Voting', accounts => {
       assert.equal(candidate.candidateAddress, 0)
     })
 
-    it('errors if another account tries to remove a candidate', () => {
+    it('errors if another account tries to remove a candidate', async () => {
+      const candidateAddress = accounts[0]
+      const nonCandidateAddress = accounts[1]
 
+      try {
+        await instance.removeCandidate(electionName, nonCandidateAddress)
+      } catch(error) {
+        err = error
+      }
+
+      assert.isOk(err instanceof Error);
+      assert.equal(err.reason, 'Only candidate can remove himself/herself from an election.');
+    })
+
+    it('errors if that candidate is not found in the election', async () => {
+      const candidateAddress = accounts[3]
+
+      try {
+        await instance.removeCandidate(electionName, candidateAddress, { from: candidateAddress })
+      } catch(error) {
+        err = error
+      }
+
+      assert.isOk(err instanceof Error);
+      assert.equal(err.reason, 'This candidate is not registered in that election.');
     })
   })
 });
