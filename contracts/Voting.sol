@@ -18,11 +18,11 @@ contract Voting {
         bool hasVoted;
     }
     mapping(address => Voter) public voters;
-    address[] voterList;
 
     struct Candidate {
         bytes32 name;
         bytes32 electionName;
+        uint256 votes;
         address candidateAddress;
     }
     mapping(address => Candidate) public candidates;
@@ -91,7 +91,7 @@ contract Voting {
         require(block.timestamp < e.registrationDeadline, 'Registration period has ended.');
         require(candidates[msg.sender].electionName != electionName, 'Candidate already registered for that election.');
         
-        Candidate memory c = Candidate(candidateName, electionName, msg.sender);
+        Candidate memory c = Candidate(candidateName, electionName, 0, msg.sender);
 
         candidates[msg.sender] = c;
         candidateList.push(msg.sender);
@@ -121,12 +121,15 @@ contract Voting {
         require(block.timestamp < e.registrationDeadline, 'Candidates are still registering.');
         
         Voter storage v = voters[msg.sender];
+        Candidate storage c = candidates[candidateAddress];
 
         require(v.hasVoted != true, 'Voter has already voted.');
 
         v.voterAddress = msg.sender;
         v.candidateAddress = candidateAddress;
         v.hasVoted = true;
+        
+        c.votes++;
         
         return true;
     }

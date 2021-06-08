@@ -198,6 +198,22 @@ contract('Voting', accounts => {
       assert.isOk(vote)
     })
 
+    it('bumps the candidate\'s vote count by 1 for every vote registered', async () => {
+      let candidate;
+      candidate = await instance.candidates(candidate1)
+      assert.equal(candidate.votes.toNumber(), 0)
+
+      await instance.vote(electionName, candidate1, { from: voter1 })
+
+      candidate = await instance.candidates(candidate1)
+      assert.equal(candidate.votes.toNumber(), 1)
+
+      await instance.vote(electionName, candidate1, { from: voter2 })
+
+      candidate = await instance.candidates(candidate1)
+      assert.equal(candidate.votes.toNumber(), 2)
+    })
+
     it('errors if election has already ended', async () => {
       await time.increase(endingTime)
 
