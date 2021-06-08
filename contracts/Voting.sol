@@ -30,6 +30,7 @@ contract Voting {
 
     struct Election {
         bytes32 name;
+        string proposal;
         uint registrationDeadline; // In seconds
         uint votingDeadline; // In seconds
         uint endingTime; // In seconds
@@ -40,7 +41,7 @@ contract Voting {
 
     uint electionIndex;
 
-    function newElection(bytes32 _name, uint _registrationDeadline, uint _votingDeadline, uint _endingTime) public {
+    function newElection(bytes32 _name, string memory _proposal, uint _registrationDeadline, uint _votingDeadline, uint _endingTime) public {
         for (uint i = 0; i < electionList.length; i++) {
             require(
                 keccak256(abi.encodePacked(electionList[i])) != keccak256(abi.encodePacked(_name)), 
@@ -51,6 +52,7 @@ contract Voting {
         Election storage election = elections[electionIndex];
 
         election.name = _name;
+        election.proposal = _proposal;
         election.registrationDeadline = block.timestamp + _registrationDeadline;
         election.votingDeadline = block.timestamp + _votingDeadline;
         election.endingTime = block.timestamp + _endingTime;
