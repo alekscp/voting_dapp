@@ -4,7 +4,7 @@ const { time } = require('@openzeppelin/test-helpers');
 contract('Voting', accounts => {
   const deploy = async () => {
     instance = await Voting.new();
-    registrationDeadline = 60, votingDeadline = 120, endingTime = 240;
+    registrationDeadline = 140, votingDeadline = 280, endingTime = 560;
   }
 
   describe('newElection', async () => {
@@ -199,7 +199,33 @@ contract('Voting', accounts => {
     })
 
     it('errors if election has already ended', async () => {
-      await time.increase(registrationDeadline)
+      await time.increase(endingTime)
+
+      try {
+        await instance.vote(electionName, candidate1, { from: voter1 })
+      } catch(error) {
+        err = error
+      }
+
+      assert.isOk(err instanceof Error);
+      assert.equal(err.reason, 'Election has already ended.');
+    })
+
+    it('errors if voting period is over', async () => {
+      await time.increase(votingDeadline)
+
+      try {
+        await instance.vote(electionName, candidate1, { from: voter1 })
+      } catch(error) {
+        err = error
+      }
+
+      assert.isOk(err instanceof Error);
+      assert.equal(err.reason, 'Voting period is over.');
+    })
+
+    it('errors if registration period is still happening', async () => {
+      await time.increase(registrationDeadline + 1)
 
       try {
         await instance.vote(electionName, candidate1, { from: voter1 })
