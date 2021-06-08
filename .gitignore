@@ -3,4 +3,5 @@ node_modules/
 # truffle build directory
 build/
 
-contracts/artifacts/*
+contracts/artifacts/**
+
