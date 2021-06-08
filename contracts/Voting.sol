@@ -61,14 +61,6 @@ contract Voting {
         electionIndex++;
     }
 
-/*
-    function getElectionCandidate(bytes32 electionName, address candidateAddress) public view returns (Candidate memory) {
-        Election storage e = elections[electionNameMap[electionName]];
-
-        return(e.candidates[candidateAddress]);
-    }
-*/
-
     function getElectionCandidates(bytes32 electionName) public view returns (Candidate[] memory) {
         //Election storage e = elections[electionNameMap[electionName]];
         uint256 candidateCount;
@@ -138,5 +130,4 @@ contract Voting {
         
         return true;
     }
-
 }
