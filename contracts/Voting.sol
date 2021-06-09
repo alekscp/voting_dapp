@@ -41,7 +41,7 @@ contract Voting {
 
     uint electionIndex;
 
-    function newElection(bytes32 _name, string memory _proposal, uint _registrationDeadline, uint _votingDeadline, uint _endingTime) public {
+    function newElection(bytes32 _name, string memory _proposal, uint _registrationDeadline, uint _votingDeadline, uint _endingTime) public  returns (bool) {
         for (uint i = 0; i < electionList.length; i++) {
             require(
                 keccak256(abi.encodePacked(electionList[i])) != keccak256(abi.encodePacked(_name)), 
@@ -61,6 +61,8 @@ contract Voting {
         electionList.push(_name);
 
         electionIndex++;
+        
+        return true;
     }
 
     function getElectionCandidates(bytes32 electionName) public view returns (Candidate[] memory) {
