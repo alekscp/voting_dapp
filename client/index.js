@@ -8,7 +8,7 @@ const initWeb3 = () => {
   return new Promise((resolve, reject) => {
     if(typeof window.ethereum !== 'undefined') {
       // const web3 = new Web3(window.ethereum);
-      window.ethereum.enable()
+      window.ethereum.request({ method: 'eth_requestAccounts' })
         .then(() => {
           resolve(new Web3(window.ethereum));
         })
