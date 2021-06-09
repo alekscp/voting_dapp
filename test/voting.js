@@ -35,6 +35,12 @@ contract('Voting', accounts => {
       assert.exists(election.name);
     });
 
+    it('sets proposal', async () => {
+      const election = await instance.elections(0);
+      const proposal = await election.proposal;
+      assert.equal(this.electionProposal, proposal);
+    });
+
     it('sets registrationDeadline relative to current block timestamp', async () => {
       const election = await instance.elections(0);
       const registrationDeadline = await election.registrationDeadline.toNumber();
