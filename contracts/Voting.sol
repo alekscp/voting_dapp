@@ -42,6 +42,7 @@ contract Voting2 {
     
     event ElectionCreated(address creator, bytes32 electionName);
     event CandidateRegistered(bytes32 candidateName, bytes32 electionName);
+    event CandidateDeleted(bytes32 candidateName, bytes32 electionName);
     event VoteRegistered(address voter, bytes32 electionName);
 
     function createElection(bytes32 electionName, string memory proposal, uint registrationDeadline, uint votingDeadline, uint endingTime) public returns(bool success) {
@@ -63,6 +64,10 @@ contract Voting2 {
         return true;
     }
     
+    function getNumberOfElections() public view returns(uint) {
+        return electionList.length;
+    }
+    
     function isElection(bytes32 electionName) public view returns (bool isIndeed) {
         if(electionList.length == 0) return false;
         return electionList[elections[electionName].electionListPointer] == electionName;
@@ -70,6 +75,8 @@ contract Voting2 {
     
     function registerCandidate(bytes32 electionName, bytes32 candidateName) public returns (bool success) {
         require(isElection(electionName), "No election with that name found.");
+        require(block.timestamp < elections[electionName].registrationDeadline, "Registration period has ended.");
+        require(candidates[msg.sender].electionKey != electionName, "Candidate already registered for that election.");
         
         candidateList.push(msg.sender);
         
@@ -89,13 +96,17 @@ contract Voting2 {
         return true;
     }
     
+    function getNumberOfCandidates() public view returns(uint) {
+        return candidateList.length;
+    }
+    
     function isCandidate(address candidateAddress) public view returns (bool isIndeed) {
         if(candidateList.length == 0) return false;
         return candidateList[candidates[candidateAddress].candidateListPointer] == candidateAddress;
     }
     
     function deleteCandidate(address candidateAddress) public returns (bool success) {
-        require(!isCandidate(candidateAddress), "Candidate not found.");
+        require(isCandidate(candidateAddress), "Candidate not found.");
         require(msg.sender == candidateAddress, "Only candidate himself/herself can withdraw from election.");
         
         // Replace candidate to delete with last element of array; remove last element; change pointer to list of candidates
@@ -103,6 +114,7 @@ contract Voting2 {
         address keyToMove = candidateList[candidateList.length - 1];
         candidateList[rowToDelete] = keyToMove;
         candidates[candidateAddress].candidateListPointer = rowToDelete;
+        bytes32 candidateName = candidates[candidateAddress].name; // Store name before deleting candidate to emit event
         candidateList.pop();
         
         // Delete candidate reference from associated election; fetch election from candidate; apply same deletion steps as previously
@@ -112,6 +124,8 @@ contract Voting2 {
         elections[electionName].candidates[rowToDelete] = keyToMove;
         elections[electionName].candidateListPointers[keyToMove] = rowToDelete;
         elections[electionName].candidates.pop();
+        
+        emit CandidateDeleted(candidateName, electionName);
         
         return true;
     }
@@ -132,6 +146,7 @@ contract Voting2 {
         v.hasVotedInElectionMapping[electionName] = true;
         
         candidates[candidateAddress].votes.push(msg.sender);
+        candidates[candidateAddress].voteCount++;
         
         emit VoteRegistered(msg.sender, electionName);
         
