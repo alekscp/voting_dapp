@@ -1,4 +1,4 @@
-const Voting = artifacts.require("Voting2");
+const Voting = artifacts.require("Voting");
 const { time } = require("@openzeppelin/test-helpers");
 
 contract("Voting", (accounts) => {
