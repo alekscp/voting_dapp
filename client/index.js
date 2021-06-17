@@ -8,7 +8,6 @@ let accounts;
 const initWeb3 = () => {
   return new Promise((resolve, reject) => {
     if(typeof window.ethereum !== 'undefined') {
-      // const web3 = new Web3(window.ethereum);
       window.ethereum.request({ method: 'eth_requestAccounts' })
         .then(() => {
           resolve(new Web3(window.ethereum));
@@ -37,22 +36,11 @@ const initContract = async () => {
   );
 };
 
-// const loadElections = async (accounts) => {
-//   const numberOfElections = await voting.methods.getNumberOfElections().call({ from: accounts[0] })
-//   console.log(numberOfElections(
-
-//   for (let i = 0; i < numberOfElections; i++) {
-//     const electionName = voting.methods.electionList(i).call({ from: accounts[0] })
-//   }
-//   const $template = document.getElementById('cardElectionTemplate');
-//   console.log($template)
-// };
-
 const initApp = async () => {
   const $createElection = document.getElementById('createElection');
   accounts = await web3.eth.getAccounts()
 
-  // loadElections(accounts)
+  loadElections();
 
   $createElection.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -66,13 +54,23 @@ const initApp = async () => {
       .createElection(electionName, electionProposal, registrationDeadline, votingDeadline, electionDeadline)
       .send({ from : accounts[0] })
       .on('receipt', (receipt) => {
-        displayElection(receipt)
+        const electionName = receipt.events.ElectionCreated.returnValues.electionName
+        displayElection(electionName)
       })
   })
 };
 
-const displayElection = (receipt) => {
-  const electionName = receipt.events.ElectionCreated.returnValues.electionName
+const loadElections = async () => {
+  const numberOfElections = await voting.methods.getNumberOfElections().call({ from: accounts[0] })
+
+  for (let i = 0; i < numberOfElections; i++) {
+    const electionName = await voting.methods.electionList(i).call({ from: accounts[0] })
+    displayElection(electionName)
+  }
+}
+
+
+const displayElection = (electionName) => {
   const $elections = document.getElementById('elections')
 
   voting.methods.elections(electionName)
@@ -86,6 +84,8 @@ const displayElection = (receipt) => {
       for (let electionID of electionIDsToModify) {
         $clone.querySelector('#' + electionID).id = electionID + electionName
       }
+
+      $clone.querySelector('.card-img-top').src = `https://source.unsplash.com/random/200x200?sig=${getRandomInt(100, 500)}`
 
       $clone.querySelector('#cardElectionName-' + electionName).textContent = web3.utils.hexToUtf8(electionName)
       $clone.querySelector('#cardElectionProposal-' + electionName).textContent = election.proposal
@@ -104,7 +104,6 @@ const displayElection = (receipt) => {
 };
 
 const appendCountdownTimerFor = (countDownTo, el) => {
-  console.log(el)
   // All Unix Epoch time handled in milliseconds to adapt to Date Object specifications
   const interval = setInterval(() => {
     const countDownToInMilliseconds = Math.floor(countDownTo * 1000)
@@ -125,6 +124,12 @@ const appendCountdownTimerFor = (countDownTo, el) => {
     }
   }, 1000)
 };
+
+const getRandomInt = (min, max) => {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   initWeb3()

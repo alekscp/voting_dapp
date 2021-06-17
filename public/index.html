@@ -50,47 +50,49 @@
         </div>
       </div>
       <div class="row">
-        <div class="col" id="elections">
+        <div class="col">
           <h3>Elections</h3>
-          <template id="cardElectionTemplate">
-            <div class="row row-cols-2">
-              <div class="card">
-                <img src="https://source.unsplash.com/random/200x200?sig=random" class="card-img-top" alt="Random image">
-                <div class="card-body">
-                  <h5 class="card-title" id="cardElectionName-"></h5>
-                  <p class="card-text" id="cardElectionProposal-"></p>
-                </div>
-                <div class="card-body" id="cardCountdowns-">
-                  <div class="row row-cols-3">
-                    <div class="col">
-                      <p>Registration Deadline</p>
-                      <div class="justify-content-center rounded-pill" id="cardRegistrationCountdown-"></div>
-                    </div>
-                    <div class="col">
-                      <p>Voting Deadline</p>
-                      <div class="justify-content-center rounded-pill" id="cardVotingCountdown-"></div>
-                    </div>
-                    <div class="col">
-                      <p>Election Ending</p>
-                      <div class="justify-content-center rounded-pill" id="cardElectionCountdown-"></div>
+          <div class="row row-cols-2" id="elections">
+            <template id="cardElectionTemplate">
+              <div class="col">
+                <div class="card">
+                  <img src="https://source.unsplash.com/random/200x200?sig=random" class="card-img-top" alt="Random image">
+                  <div class="card-body">
+                    <h5 class="card-title" id="cardElectionName-"></h5>
+                    <p class="card-text" id="cardElectionProposal-"></p>
+                  </div>
+                  <div class="card-body" id="cardCountdowns-">
+                    <div class="row row-cols-3">
+                      <div class="col">
+                        <p>Registration Deadline</p>
+                        <div class="justify-content-center rounded-pill" id="cardRegistrationCountdown-"></div>
+                      </div>
+                      <div class="col">
+                        <p>Voting Deadline</p>
+                        <div class="justify-content-center rounded-pill" id="cardVotingCountdown-"></div>
+                      </div>
+                      <div class="col">
+                        <p>Election Ending</p>
+                        <div class="justify-content-center rounded-pill" id="cardElectionCountdown-"></div>
+                      </div>
                     </div>
                   </div>
+                  <div class="card-header">
+                    <span>Candidates</span>
+                    <button type="button" class="btn btn-sm btn-warning" id="cardRegisterCandidate-">Register</button>
+                  </div>
+                  <ul class="list-group list-group-flush" id="cardElectionCandidateList-">
+                    <a class="list-group-item list-group-item-action">
+                      <span id="cardCandidateName-">Candidate Name</span>
+                      <button type="button" class="btn btn-sm btn-success" id="cardVoteForCandidate-">Vote</button>
+                      <button type="button" class="btn btn-sm btn-danger" id="cardRemoveCandidate-">Remove</button>
+                    </a>
+                  </ul>
                 </div>
-                <div class="card-header">
-                  <span>Candidates</span>
-                  <button type="button" class="btn btn-sm btn-warning" id="cardRegisterCandidate-">Register</button>
-                </div>
-                <ul class="list-group list-group-flush" id="cardElectionCandidateList-">
-                  <a class="list-group-item list-group-item-action">
-                    <span id="cardCandidateName-">Candidate Name</span>
-                    <button type="button" class="btn btn-sm btn-success" id="cardVoteForCandidate-">Vote</button>
-                    <button type="button" class="btn btn-sm btn-danger" id="cardRemoveCandidate-">Remove</button>
-                  </a>
-                </ul>
               </div>
-            </div>
-          </template>
+          </div>
         </div>
+            </template>
       </div>
     </div>
   </body>
