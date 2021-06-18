@@ -79,7 +79,7 @@ const displayElection = (electionName) => {
       const $template = document.getElementById('cardElectionTemplate')
       const $clone = $template.content.cloneNode(true);
 
-      const electionIDsToModify = ['cardElectionName-', 'cardElectionProposal-', 'cardCountdowns-', 'cardRegistrationCountdown-', 'cardVotingCountdown-', 'cardElectionCountdown-', 'cardElectionCandidateList-']
+      const electionIDsToModify = ['cardElectionName-', 'cardElectionProposal-', 'cardCountdowns-', 'cardRegistrationCountdown-', 'cardVotingCountdown-', 'cardElectionCountdown-', 'cardRegisterCandidate-', 'cardElectionCandidateList-']
 
       for (let electionID of electionIDsToModify) {
         $clone.querySelector('#' + electionID).id = electionID + electionName
@@ -99,8 +99,38 @@ const displayElection = (electionName) => {
       const $electionCountdown = $clone.querySelector('#cardElectionCountdown-' + electionName)
       appendCountdownTimerFor(election.endingTime, $electionCountdown)
 
-      $elections.appendChild($clone)
+      const $cardRegisterCandidate = $clone.querySelector('#cardRegisterCandidate-' + electionName)
+      $cardRegisterCandidate.addEventListener('click', () => {
+        registerCandidate(electionName)
+      })
+
+      // NOTE: Weird behaviour on the UI versus appendChild()
+      $elections.prepend($clone)
     })
+};
+
+const registerCandidate = (electionName) => {
+  const $registerCandidateSubmitButton = document.getElementById('registerCandidateModalSubmit')
+  const $registerCandidateName = document.getElementById('registerCandidateName')
+
+  $registerCandidateSubmitButton.addEventListener('click', (e) => {
+    e.preventDefault
+    const candidateName = $registerCandidateName.value
+
+    if (!candidateName) return alert('Name cannot be empty')
+
+    voting.methods
+      .registerCandidate(electionName, web3.utils.utf8ToHex(candidateName))
+      .send({ from : accounts[0] })
+      .on('receipt', (receipt) => {
+        console.log(receipt)
+      })
+      .on('error', (error, receipt) => {
+        console.log(error)
+      })
+  })
+  console.log(electionName)
+  
 };
 
 const appendCountdownTimerFor = (countDownTo, el) => {
