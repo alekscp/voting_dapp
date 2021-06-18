@@ -9,7 +9,11 @@ const initWeb3 = () => {
   return new Promise((resolve, reject) => {
     if(typeof window.ethereum !== 'undefined') {
       window.ethereum.request({ method: 'eth_requestAccounts' })
+        .then((acc) => {
+          updateAccounts(acc)
+        })
         .then(() => {
+          window.ethereum.on('accountsChanged', () => updateAccounts());
           resolve(new Web3(window.ethereum));
         })
         .catch(e => {
@@ -26,6 +30,14 @@ const initWeb3 = () => {
   })
 };
 
+const updateAccounts = async (acc) => {
+  if (web3) {
+    accounts = acc || await web3.eth.getAccounts()
+  } else {
+    accounts = acc
+  }
+};
+
 const initContract = async () => {
   const networkId = await web3.eth.net.getId();
   return new web3.eth.Contract(
@@ -38,7 +50,6 @@ const initContract = async () => {
 
 const initApp = async () => {
   const $createElection = document.getElementById('createElection');
-  accounts = await web3.eth.getAccounts()
 
   loadElections();
 
