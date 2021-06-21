@@ -138,7 +138,7 @@ contract("Voting", (accounts) => {
       assert.equal(err.reason, "Registration period has ended.");
     });
 
-    it("errors if the candidate has already registered to that election", async () => {
+    it("errors if the candidate has already registered to an election", async () => {
       const electionName = web3.utils.toHex("Other election");
       const candidateName = web3.utils.toHex("Bob");
 
@@ -152,7 +152,7 @@ contract("Voting", (accounts) => {
       }
 
       assert.isOk(err instanceof Error);
-      assert.equal(err.reason, "Candidate already registered for that election.");
+      assert.equal(err.reason, "You have already registered for an election.");
     });
 
     describe("Logs", async () => {
