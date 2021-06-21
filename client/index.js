@@ -45,7 +45,8 @@ const initContract = async () => {
 const initApp = async () => {
   const $createElection = document.getElementById("createElection");
 
-  loadElections();
+  await loadElections();
+  await loadCandidates();
 
   $createElection.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -71,6 +72,17 @@ const loadElections = async () => {
   for (let i = 0; i < numberOfElections; i++) {
     const electionName = await voting.methods.electionList(i).call({ from: accounts[0] });
     displayElection(electionName);
+  }
+};
+
+const loadCandidates = async () => {
+  const numberOfCandidates = await voting.methods.getNumberOfCandidates().call({ from: accounts[0] })
+
+  for (let i = 0; i < numberOfCandidates; i++) {
+    const candidateAddress = await voting.methods.candidateList(i).call({ from: accounts[0] })
+    const candidate = await voting.methods.candidates(candidateAddress).call({ from: accounts[0] })
+
+    displayCandidate(candidate.electionKey, candidate.name, candidateAddress)
   }
 };
 
@@ -145,7 +157,7 @@ const registerCandidate = (electionName) => {
       .send({ from: accounts[0] })
       .on("receipt", (receipt) => {
         console.log(receipt);
-        addCandidateToList(electionName, candidateName, receipt.from)
+        displayCandidate(electionName, candidateName, receipt.from)
         $registerCandidateName.value = ""
         $modal.toggle()
       })
@@ -160,7 +172,7 @@ const registerCandidate = (electionName) => {
   );
 };
 
-const addCandidateToList = (electionName, candidateName, candidateAddress) => {
+const displayCandidate = (electionName, candidateName, candidateAddress) => {
   const $candidateList = document.getElementById("cardElectionCandidateList-" + electionName)
   const $candidateTemplate = document.getElementById("cardCandidateTemplate");
   const $candidateClone = $candidateTemplate.content.cloneNode(true)
@@ -174,7 +186,7 @@ const addCandidateToList = (electionName, candidateName, candidateAddress) => {
   const $candidateRemoveButton = $candidateClone.querySelector("#cardRemoveCandidate-")
   $candidateRemoveButton.id = $candidateRemoveButton.id + candidateAddress
 
-  $candidateName.textContent = candidateName
+  $candidateName.textContent = web3.utils.hexToUtf8(candidateName)
 
   $candidateVoteButton.addEventListener("click", () => voteForCandidate(electionName, candidateAddress))
   $candidateRemoveButton.addEventListener("click", () => removeCandidate(candidateAddress))
@@ -182,8 +194,16 @@ const addCandidateToList = (electionName, candidateName, candidateAddress) => {
   $candidateList.appendChild($candidateClone)
 };
 
-const voteForCandidate = async () => {
-  
+const voteForCandidate = async (electionName, candidateAddress) => {
+  voting.methods
+    .vote(electionName, candidateAddress)
+    .send({ from: accounts[0] })
+    .on("receipt", (receipt) => {
+      
+    })
+    .on("error", (error, receipt) => {
+      
+    })
 };
 
 const removeCandidate = async () => {
