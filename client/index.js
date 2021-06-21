@@ -162,21 +162,19 @@ const registerCandidate = (electionName) => {
 
 const addCandidateToList = (electionName, candidateName, candidateAddress) => {
   const $candidateList = document.getElementById("cardElectionCandidateList-" + electionName)
-  $candidateList.hidden = false
+  const $candidateTemplate = document.getElementById("cardCandidateTemplate");
+  const $candidateClone = $candidateTemplate.content.cloneNode(true)
 
-  const $candidateTemplate = $candidateList.firstElementChild
-  const $candidateClone = $candidateTemplate.cloneNode(true)
+  const $candidateName = $candidateClone.querySelector("#cardCandidateName-")
+  $candidateName.id = $candidateName.id + candidateAddress
 
-  const $candidateName = $candidateClone.getElementById("cardCandidateName-")
-  const $candidateVoteButton = $candidateClone.getElementById("cardVoteForCandidate-")
-  const $candidateRemoveButton = $candidateClone.getElementById("cardRemoveCandidate-")
+  const $candidateVoteButton = $candidateClone.querySelector("#cardVoteForCandidate-")
+  $candidateVoteButton.id = $candidateVoteButton.id + candidateAddress
 
-  $candidateName.value = candidateName
+  const $candidateRemoveButton = $candidateClone.querySelector("#cardRemoveCandidate-")
+  $candidateRemoveButton.id = $candidateRemoveButton.id + candidateAddress
 
-  [$candidateName, $candidateVoteButton, $candidateRemoveButton].forEach((el) => {
-    console.log(el)
-    el.id = el.id + candidateAddress
-  })
+  $candidateName.textContent = candidateName
 
   $candidateVoteButton.addEventListener("click", () => voteForCandidate(electionName, candidateAddress))
   $candidateRemoveButton.addEventListener("click", () => removeCandidate(candidateAddress))
