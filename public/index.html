@@ -82,15 +82,16 @@
                     <button type="button" class="btn btn-sm btn-warning" id="cardRegisterCandidate-"
                                   data-bs-toggle="modal" data-bs-target="#registerCandidateModal">Register</button>
                   </div>
-                  <ul class="list-group list-group-flush" id="cardElectionCandidateList-" hidden>
-                    <a class="list-group-item list-group-item-action">
-                      <span id="cardCandidateName-">Candidate Name</span>
-                      <button type="button" class="btn btn-sm btn-success" id="cardVoteForCandidate-">Vote</button>
-                      <button type="button" class="btn btn-sm btn-danger" id="cardRemoveCandidate-">Remove</button>
-                    </a>
-                  </ul>
+                  <ul class="list-group list-group-flush" id="cardElectionCandidateList-"></ul>
                 </div>
               </div>
+            </template>
+            <template id="cardCandidateTemplate">
+              <a class="list-group-item list-group-item-action">
+                <span id="cardCandidateName-">Candidate Name</span>
+                <button type="button" class="btn btn-sm btn-success" id="cardVoteForCandidate-">Vote</button>
+                <button type="button" class="btn btn-sm btn-danger" id="cardRemoveCandidate-">Remove</button>
+              </a>
             </template>
           </div>
         </div>
