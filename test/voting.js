@@ -269,7 +269,7 @@ contract("Voting", (accounts) => {
       const candidateName2 = web3.utils.toHex("Bob");
       const candidateName3 = web3.utils.toHex("Bob");
 
-      [candidate1, candidate2, candidate3, voter1, voter2, voter3, voter4] = accounts;
+      [candidate1, candidate2, candidate3, voter1, voter2, voter3, voter4, voter5, voter6] = accounts;
       await createElection();
 
       await instance.registerCandidate(this.electionName, candidateName1, { from: candidate1 });
@@ -322,10 +322,10 @@ contract("Voting", (accounts) => {
     });
 
     it("errors if registration period is still happening", async () => {
-      await time.increase(this.registrationDeadline + 1);
+      await time.increase(this.registrationDeadline);
 
       try {
-        await instance.vote(this.electionName, candidate1, { from: voter1 });
+        await instance.vote(this.electionName, candidate1, { from: voter5 });
       } catch (error) {
         err = error;
       }
@@ -333,6 +333,20 @@ contract("Voting", (accounts) => {
       assert.isOk(err instanceof Error);
       assert.equal(err.reason, "Candidates are still registering.");
     });
+
+    it("errors if voter has already voted in election", async () => {
+      await instance.vote(this.electionName, candidate1, { from: voter6 });
+
+      try {
+        await instance.vote(this.electionName, candidate1, { from: voter6 });
+      } catch (error) {
+        err = error;
+      }
+
+      assert.isOk(err instanceof Error);
+      assert.equal(err.reason, "Your vote was already registered in that election.");
+    });
+
 
     describe("Logs", async () => {
       it("emits VoteRegistered with corret arguments", async () => {
