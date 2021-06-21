@@ -117,9 +117,12 @@ const displayElection = (electionName) => {
       appendCountdownTimerFor(election.endingTime, $electionCountdown);
 
       const $cardRegisterCandidate = $clone.querySelector("#cardRegisterCandidate-" + electionName);
-      $cardRegisterCandidate.addEventListener("click", () => {
-        registerCandidate(electionName);
-      });
+      $cardRegisterCandidate.addEventListener(
+        "click",
+        () => {
+          registerCandidate(electionName);
+        }
+      );
 
       // NOTE: Weird behaviour on the UI versus appendChild()
       $elections.prepend($clone);
@@ -129,9 +132,10 @@ const displayElection = (electionName) => {
 const registerCandidate = (electionName) => {
   const $registerCandidateSubmitButton = document.getElementById("registerCandidateModalSubmit");
   const $registerCandidateName = document.getElementById("registerCandidateName");
+  const $modal = document.getElementById("registerCandidateModal");
 
+  const controller = new AbortController()
   $registerCandidateSubmitButton.addEventListener("click", (e) => {
-    e.preventDefault;
     const candidateName = $registerCandidateName.value;
 
     if (!candidateName) return alert("Name cannot be empty");
@@ -141,12 +145,51 @@ const registerCandidate = (electionName) => {
       .send({ from: accounts[0] })
       .on("receipt", (receipt) => {
         console.log(receipt);
+        addCandidateToList(electionName, candidateName, receipt.from)
+        $registerCandidateName.value = ""
+        $modal.toggle()
       })
       .on("error", (error, receipt) => {
         console.log(error);
+        $registerCandidateName.value = ""
       });
-  });
-  console.log(electionName);
+
+    controller.abort()
+  },
+    { signal: controller.signal }
+  );
+};
+
+const addCandidateToList = (electionName, candidateName, candidateAddress) => {
+  const $candidateList = document.getElementById("cardElectionCandidateList-" + electionName)
+  $candidateList.hidden = false
+
+  const $candidateTemplate = $candidateList.firstElementChild
+  const $candidateClone = $candidateTemplate.cloneNode(true)
+
+  const $candidateName = $candidateClone.getElementById("cardCandidateName-")
+  const $candidateVoteButton = $candidateClone.getElementById("cardVoteForCandidate-")
+  const $candidateRemoveButton = $candidateClone.getElementById("cardRemoveCandidate-")
+
+  $candidateName.value = candidateName
+
+  [$candidateName, $candidateVoteButton, $candidateRemoveButton].forEach((el) => {
+    console.log(el)
+    el.id = el.id + candidateAddress
+  })
+
+  $candidateVoteButton.addEventListener("click", () => voteForCandidate(electionName, candidateAddress))
+  $candidateRemoveButton.addEventListener("click", () => removeCandidate(candidateAddress))
+
+  $candidateList.appendChild($candidateClone)
+};
+
+const voteForCandidate = async () => {
+  
+};
+
+const removeCandidate = async () => {
+  
 };
 
 const appendCountdownTimerFor = (countDownTo, el) => {

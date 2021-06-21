@@ -79,9 +79,10 @@
                   </div>
                   <div class="card-header">
                     <span>Candidates</span>
-                    <button type="button" class="btn btn-sm btn-warning" id="cardRegisterCandidate-">Register</button>
+                    <button type="button" class="btn btn-sm btn-warning" id="cardRegisterCandidate-"
+                                  data-bs-toggle="modal" data-bs-target="#registerCandidateModal">Register</button>
                   </div>
-                  <ul class="list-group list-group-flush" id="cardElectionCandidateList-">
+                  <ul class="list-group list-group-flush" id="cardElectionCandidateList-" hidden>
                     <a class="list-group-item list-group-item-action">
                       <span id="cardCandidateName-">Candidate Name</span>
                       <button type="button" class="btn btn-sm btn-success" id="cardVoteForCandidate-">Vote</button>
@@ -90,10 +91,28 @@
                   </ul>
                 </div>
               </div>
+            </template>
           </div>
         </div>
-            </template>
       </div>
     </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="registerCandidateModal" tabindex="-1" aria-labelledby="registerCandidateModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">What is your name?</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <input type="text" class="form-control" id="registerCandidateName" placeholder="Candidate Name" aria-label="Candidate Name" aria-describedby="basic-addon1">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" id="registerCandidateModalSubmit" class="btn btn-primary" data-bs-dismiss="modal">Save changes</button>
+          </div>
+        </div>
+      </div>
   </body>
 </html>
