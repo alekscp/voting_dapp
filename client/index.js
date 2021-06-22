@@ -198,15 +198,21 @@ const voteForCandidate = async (electionName, candidateAddress) => {
     .vote(electionName, candidateAddress)
     .send({ from: accounts[0] })
     .on("receipt", (receipt) => {
+    })
+    .on("error", (error, receipt) => {
+    })
+};
+
+const removeCandidate = async (candidateAddress) => {
+  voting.methods
+    .deleteCandidate(candidateAddress)
+    .send({ from: accounts[0] })
+    .on("receipt", (receipt) => {
       
     })
     .on("error", (error, receipt) => {
       
     })
-};
-
-const removeCandidate = async () => {
-  
 };
 
 const appendCountdownTimerFor = (countDownTo, el) => {
