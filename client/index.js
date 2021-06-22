@@ -56,16 +56,18 @@ const initApp = async () => {
 
   $createElection.addEventListener("submit", (e) => {
     e.preventDefault();
-    const electionName = web3.utils.asciiToHex(e.target.electionName.value);
-    const electionProposal = e.target.electionProposal.value;
-    const registrationDeadline = e.target.registrationDeadline.value;
-    const votingDeadline = e.target.votingDeadline.value;
-    const electionDeadline = e.target.endingTime.value;
+
+    const electionName = web3.utils.asciiToHex(document.getElementById("electionName").value)
+    const electionProposal = document.getElementById("electionProposal").value
+    const registrationDeadline = document.getElementById("registrationDeadline").value
+    const votingDeadline = document.getElementById("votingDeadline").value
+    const electionDeadline = document.getElementById("endingTime").value
 
     voting.methods
       .createElection(electionName, electionProposal, registrationDeadline, votingDeadline, electionDeadline)
       .send({ from: accounts[0] })
       .on("receipt", (receipt) => {
+        console.log(receipt)
         const electionName = receipt.events.ElectionCreated.returnValues.electionName;
         displayElection(electionName);
       });
