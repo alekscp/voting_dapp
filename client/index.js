@@ -5,6 +5,12 @@ let web3;
 let voting;
 let accounts;
 
+const ALERT_MAPPINGS = {
+  info: "info",
+  warning: "warning",
+  error: "danger"
+};
+
 const initWeb3 = () => {
   return new Promise((resolve, reject) => {
     if (typeof window.ethereum !== "undefined") {
@@ -157,13 +163,12 @@ const registerCandidate = (electionName) => {
       .send({ from: accounts[0] })
       .on("receipt", async (receipt) => {
         console.log(receipt);
-        showAlert("success", "HELLO")
         await displayCandidate(electionName, web3.utils.utf8ToHex(candidateName), receipt.from)
         $registerCandidateName.value = ""
       })
       .on("error", (error, receipt) => {
         console.log(error);
-        showAlert("danger", "HELLO")
+        showAlert(ALERT_MAPPINGS.error, parseError(error))
         $registerCandidateName.value = ""
       });
 
@@ -244,12 +249,22 @@ const showAlert = (level, message) => {
 
   const elements = `
     <div class="alert alert-${level} alert-dismissible fade show" role="alert">
-      ${message}
+      <strong>Mamma Mia!</strong> ${message}
       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
   `
 
   $alert.innerHTML = elements
+};
+
+const parseError = (error) => {
+  const regex = new RegExp(/(?<=\')(.*)(?=\')/gm)
+  const str = error.message
+  const json = JSON.parse(str.match(regex))
+  const data = json.value.data.data
+  const lookupKey = Object.keys(data)[0]
+
+  return data[lookupKey].reason
 };
 
 const getRandomInt = (min, max) => {
