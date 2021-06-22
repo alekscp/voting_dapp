@@ -14,7 +14,7 @@ const initWeb3 = () => {
           updateAccounts(acc);
         })
         .then(() => {
-          window.ethereum.on("accountsChanged", () => updateAccounts());
+          window.ethereum.on("accountsChanged", async () => await updateAccounts());
           resolve(new Web3(window.ethereum));
         })
         .catch((e) => {
@@ -82,7 +82,7 @@ const loadCandidates = async () => {
     const candidateAddress = await voting.methods.candidateList(i).call({ from: accounts[0] })
     const candidate = await voting.methods.candidates(candidateAddress).call({ from: accounts[0] })
 
-    displayCandidate(candidate.electionKey, candidate.name, candidateAddress)
+    await displayCandidate(candidate.electionKey, candidate.name, candidateAddress)
   }
 };
 
@@ -155,11 +155,10 @@ const registerCandidate = (electionName) => {
     voting.methods
       .registerCandidate(electionName, web3.utils.utf8ToHex(candidateName))
       .send({ from: accounts[0] })
-      .on("receipt", (receipt) => {
+      .on("receipt", async (receipt) => {
         console.log(receipt);
-        displayCandidate(electionName, candidateName, receipt.from)
+        await displayCandidate(electionName, web3.utils.utf8ToHex(candidateName), receipt.from)
         $registerCandidateName.value = ""
-        $modal.toggle()
       })
       .on("error", (error, receipt) => {
         console.log(error);
@@ -172,7 +171,7 @@ const registerCandidate = (electionName) => {
   );
 };
 
-const displayCandidate = (electionName, candidateName, candidateAddress) => {
+const displayCandidate = async (electionName, candidateName, candidateAddress) => {
   const $candidateList = document.getElementById("cardElectionCandidateList-" + electionName)
   const $candidateTemplate = document.getElementById("cardCandidateTemplate");
   const $candidateClone = $candidateTemplate.content.cloneNode(true)
