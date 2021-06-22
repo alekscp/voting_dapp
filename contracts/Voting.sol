@@ -156,7 +156,7 @@ contract Voting {
         v.candidateKey = candidateAddress;
         //v.hasVotedInElectionMapping[electionName] = true;
 
-        hasVotedInElectionMapping2[candidateAddress][electionName] = true;
+        hasVotedInElectionMapping2[msg.sender][electionName] = true;
 
         candidates[candidateAddress].votes.push(msg.sender);
         candidates[candidateAddress].voteCount++;
