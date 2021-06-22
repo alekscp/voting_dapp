@@ -157,11 +157,13 @@ const registerCandidate = (electionName) => {
       .send({ from: accounts[0] })
       .on("receipt", async (receipt) => {
         console.log(receipt);
+        showAlert("success", "HELLO")
         await displayCandidate(electionName, web3.utils.utf8ToHex(candidateName), receipt.from)
         $registerCandidateName.value = ""
       })
       .on("error", (error, receipt) => {
         console.log(error);
+        showAlert("danger", "HELLO")
         $registerCandidateName.value = ""
       });
 
@@ -237,11 +239,25 @@ const appendCountdownTimerFor = (countDownTo, el) => {
   }, 1000);
 };
 
+const showAlert = (level, message) => {
+  const $alert = document.getElementById("alertArea")
+
+  const elements = `
+    <div class="alert alert-${level} alert-dismissible fade show" role="alert">
+      ${message}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  `
+
+  $alert.innerHTML = elements
+};
+
 const getRandomInt = (min, max) => {
   min = Math.ceil(min);
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
 };
+
 
 document.addEventListener("DOMContentLoaded", () => {
   initWeb3()
