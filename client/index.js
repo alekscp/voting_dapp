@@ -135,6 +135,7 @@ const displayElection = (electionName) => {
 
       const $electionCountdown = $clone.querySelector("#cardElectionCountdown-" + electionName);
       appendCountdownTimerFor(election.endingTime, $electionCountdown);
+      $electionCountdown.addEventListener("electionOver", () => { showElectionResults(electionName) })
 
       const $cardRegisterCandidate = $clone.querySelector("#cardRegisterCandidate-" + electionName);
       $cardRegisterCandidate.addEventListener(
@@ -147,6 +148,33 @@ const displayElection = (electionName) => {
       // NOTE: Weird behaviour on the UI versus appendChild()
       $elections.prepend($clone);
     });
+};
+
+const showElectionResults = async (electionName) => {
+  const $ul = document.getElementById("cardElectionCandidateList-" + electionName)
+  const $as = $ul.getElementsByTagName("a")
+  const $ulClone = $ul.cloneNode(false)
+
+  const lis = []
+  for (const $a of $as) {
+    const candidateAddress = $a.firstElementChild.id.match(/cardCandidateName-(.*)/)[1]
+    const candidate = await voting.methods.candidates(candidateAddress).call({ from: accounts[0] })
+    const voteCount = candidate.voteCount
+
+    $a.innerHTML += `<span class="badge rounded-pill bg-info text-dark">${voteCount} votes</span>`
+
+    lis.push({ element: $a, voteCount: parseInt(voteCount) })
+  }
+
+  lis.sort((a, b) => {
+    return b.voteCount - a.voteCount
+  })
+
+  for (const item of lis) {
+    $ulClone.appendChild(item.element)
+  }
+
+  $ul.parentNode.replaceChild($ulClone, $ul)
 };
 
 const registerCandidate = (electionName) => {
@@ -219,8 +247,14 @@ const voteForCandidate = async (electionName, candidateAddress) => {
     .vote(electionName, candidateAddress)
     .send({ from: accounts[0] })
     .on("receipt", (receipt) => {
+      const event = parseEvent(receipt)
+      showAlert(
+        ALERT_MAPPINGS.info,
+        `${web3.utils.hexToUtf8(event.voter)} just voted in ${web3.utils.hexToUtf8(event.electionName)}`
+      )
     })
     .on("error", (error, receipt) => {
+      showAlert(ALERT_MAPPINGS.error, parseErrorMessage(error))
     })
 };
 
@@ -229,7 +263,11 @@ const removeCandidate = async (candidateAddress) => {
     .deleteCandidate(candidateAddress)
     .send({ from: accounts[0] })
     .on("receipt", (receipt) => {
-      
+      const event = parseEvent(receipt)
+      showAlert(
+        ALERT_MAPPINGS.info,
+        `Candidate ${web3.utils.hexToUtf8(event.candidateName)} removed from ${web3.utils.hexToUtf8(event.electionName)}`
+      )
     })
     .on("error", (error, receipt) => {
       showAlert(ALERT_MAPPINGS.error, parseErrorMessage(error))
@@ -252,8 +290,10 @@ const appendCountdownTimerFor = (countDownTo, el) => {
     el.innerHTML = days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
 
     if (timeLeft < 0) {
+      const event = new Event("electionOver")
       clearInterval(interval);
       el.innerHTML = "OVER";
+      el.dispatchEvent(event)
     }
   }, 1000);
 };
