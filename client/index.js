@@ -166,11 +166,16 @@ const registerCandidate = (electionName) => {
       .on("receipt", async (receipt) => {
         console.log(receipt);
         await displayCandidate(electionName, web3.utils.utf8ToHex(candidateName), receipt.from)
+        const event = parseEvent(receipt)
+        showAlert(
+          ALERT_MAPPINGS.info,
+          `Candidate ${web3.utils.hexToUtf8(event.candidateName)} registered to ${web3.utils.hexToUtf8(event.electionName)}`
+        )
         $registerCandidateName.value = ""
       })
       .on("error", (error, receipt) => {
         console.log(error);
-        showAlert(ALERT_MAPPINGS.error, parseError(error))
+        showAlert(ALERT_MAPPINGS.error, parseErrorMessage(error))
         $registerCandidateName.value = ""
       });
 
@@ -178,6 +183,13 @@ const registerCandidate = (electionName) => {
   },
     { signal: controller.signal }
   );
+};
+
+const parseEvent = (receipt) => {
+  const eventObj = receipt.events
+  const eventKey = Object.keys(eventObj)[0]
+
+  return eventObj[eventKey].returnValues
 };
 
 const displayCandidate = async (electionName, candidateName, candidateAddress) => {
@@ -220,7 +232,7 @@ const removeCandidate = async (candidateAddress) => {
       
     })
     .on("error", (error, receipt) => {
-      
+      showAlert(ALERT_MAPPINGS.error, parseErrorMessage(error))
     })
 };
 
@@ -259,7 +271,7 @@ const showAlert = (level, message) => {
   $alert.innerHTML = elements
 };
 
-const parseError = (error) => {
+const parseErrorMessage = (error) => {
   const regex = new RegExp(/(?<=\')(.*)(?=\')/gm)
   const str = error.message
   const json = JSON.parse(str.match(regex))
