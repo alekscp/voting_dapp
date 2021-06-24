@@ -35,14 +35,6 @@ const initWeb3 = () => {
   });
 };
 
-const updateAccounts = async (acc) => {
-  if (web3) {
-    accounts = acc || (await web3.eth.getAccounts());
-  } else {
-    accounts = acc;
-  }
-};
-
 const initContract = async () => {
   const networkId = await web3.eth.net.getId();
   return new web3.eth.Contract(Voting.abi, Voting.networks[networkId].address);
@@ -135,7 +127,7 @@ const displayElection = (electionName) => {
 
       const $electionCountdown = $clone.querySelector("#cardElectionCountdown-" + electionName);
       appendCountdownTimerFor(election.endingTime, $electionCountdown);
-      $electionCountdown.addEventListener("electionOver", () => { showElectionResults(electionName) })
+      $electionCountdown.addEventListener("electionOver", () => { displayElectionResults(electionName) })
 
       const $cardRegisterCandidate = $clone.querySelector("#cardRegisterCandidate-" + electionName);
       $cardRegisterCandidate.addEventListener(
@@ -150,7 +142,7 @@ const displayElection = (electionName) => {
     });
 };
 
-const showElectionResults = async (electionName) => {
+const displayElectionResults = async (electionName) => {
   const $ul = document.getElementById("cardElectionCandidateList-" + electionName)
   const $as = $ul.getElementsByTagName("a")
   const $ulClone = $ul.cloneNode(false)
@@ -175,6 +167,28 @@ const showElectionResults = async (electionName) => {
   }
 
   $ul.parentNode.replaceChild($ulClone, $ul)
+};
+
+const displayCandidate = async (electionName, candidateName, candidateAddress) => {
+  const $candidateList = document.getElementById("cardElectionCandidateList-" + electionName)
+  const $candidateTemplate = document.getElementById("cardCandidateTemplate");
+  const $candidateClone = $candidateTemplate.content.cloneNode(true)
+
+  const $candidateName = $candidateClone.querySelector("#cardCandidateName-")
+  $candidateName.id = $candidateName.id + candidateAddress
+
+  const $candidateVoteButton = $candidateClone.querySelector("#cardVoteForCandidate-")
+  $candidateVoteButton.id = $candidateVoteButton.id + candidateAddress
+
+  const $candidateRemoveButton = $candidateClone.querySelector("#cardRemoveCandidate-")
+  $candidateRemoveButton.id = $candidateRemoveButton.id + candidateAddress
+
+  $candidateName.textContent = web3.utils.hexToUtf8(candidateName)
+
+  $candidateVoteButton.addEventListener("click", () => voteForCandidate(electionName, candidateAddress))
+  $candidateRemoveButton.addEventListener("click", () => removeCandidate(candidateAddress))
+
+  $candidateList.appendChild($candidateClone)
 };
 
 const registerCandidate = (electionName) => {
@@ -211,35 +225,6 @@ const registerCandidate = (electionName) => {
   },
     { signal: controller.signal }
   );
-};
-
-const parseEvent = (receipt) => {
-  const eventObj = receipt.events
-  const eventKey = Object.keys(eventObj)[0]
-
-  return eventObj[eventKey].returnValues
-};
-
-const displayCandidate = async (electionName, candidateName, candidateAddress) => {
-  const $candidateList = document.getElementById("cardElectionCandidateList-" + electionName)
-  const $candidateTemplate = document.getElementById("cardCandidateTemplate");
-  const $candidateClone = $candidateTemplate.content.cloneNode(true)
-
-  const $candidateName = $candidateClone.querySelector("#cardCandidateName-")
-  $candidateName.id = $candidateName.id + candidateAddress
-
-  const $candidateVoteButton = $candidateClone.querySelector("#cardVoteForCandidate-")
-  $candidateVoteButton.id = $candidateVoteButton.id + candidateAddress
-
-  const $candidateRemoveButton = $candidateClone.querySelector("#cardRemoveCandidate-")
-  $candidateRemoveButton.id = $candidateRemoveButton.id + candidateAddress
-
-  $candidateName.textContent = web3.utils.hexToUtf8(candidateName)
-
-  $candidateVoteButton.addEventListener("click", () => voteForCandidate(electionName, candidateAddress))
-  $candidateRemoveButton.addEventListener("click", () => removeCandidate(candidateAddress))
-
-  $candidateList.appendChild($candidateClone)
 };
 
 const voteForCandidate = async (electionName, candidateAddress) => {
@@ -319,6 +304,21 @@ const parseErrorMessage = (error) => {
   const lookupKey = Object.keys(data)[0]
 
   return data[lookupKey].reason
+};
+
+const parseEvent = (receipt) => {
+  const eventObj = receipt.events
+  const eventKey = Object.keys(eventObj)[0]
+
+  return eventObj[eventKey].returnValues
+};
+
+const updateAccounts = async (acc) => {
+  if (web3) {
+    accounts = acc || (await web3.eth.getAccounts());
+  } else {
+    accounts = acc;
+  }
 };
 
 const getRandomInt = (min, max) => {
