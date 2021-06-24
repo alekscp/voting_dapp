@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
 pragma solidity ^0.8.4;
-//pragma abicoder v2;
 
 // Create a dapp for voting where all of the votes and candidate registration happens on chain.
 // Allow anyone to start an election with a registration period, voting period, and ending time.
@@ -12,10 +11,9 @@ contract Voting {
     struct Vote {
         address voterAddress;
         address candidateKey;
-        //mapping(bytes32 => bool) hasVotedInElectionMapping;
     }
     mapping(address => Vote) public votes;
-    mapping(address => mapping(bytes32 => bool)) public hasVotedInElectionMapping2;
+    mapping(address => mapping(bytes32 => bool)) public hasVotedInElectionMapping;
 
     struct Candidate {
         uint candidateListPointer;
@@ -36,10 +34,9 @@ contract Voting {
         uint votingDeadline; // In seconds
         uint endingTime; // In seconds
         address[] candidates;
-        //mapping(address => uint) candidateListPointers;
     }
     mapping(bytes32 => Election) public elections;
-    mapping(bytes32 => mapping(address => uint)) public candidateListPointers2;
+    mapping(bytes32 => mapping(address => uint)) public candidateListPointers;
     bytes32[] public electionList;
 
     event ElectionCreated(address creator, bytes32 electionName);
@@ -47,7 +44,14 @@ contract Voting {
     event CandidateDeleted(bytes32 candidateName, bytes32 electionName);
     event VoteRegistered(address voter, bytes32 electionName);
 
-    function createElection(bytes32 electionName, string memory proposal, uint registrationDeadline, uint votingDeadline, uint endingTime) public returns(bool success) {
+    function createElection(
+        bytes32 electionName,
+        string memory proposal,
+        uint registrationDeadline,
+        uint votingDeadline,
+        uint endingTime
+        ) public returns(bool success)
+    {
         require(!isElection(electionName), "Election with that name already exists.");
 
         electionList.push(electionName);
@@ -68,10 +72,6 @@ contract Voting {
 
     function getNumberOfElections() public view returns(uint) {
         return electionList.length;
-    }
-
-    function getElection(bytes32 electionName) public view returns (Election memory) {
-
     }
 
     function isElection(bytes32 electionName) public view returns (bool isIndeed) {
@@ -95,8 +95,7 @@ contract Voting {
         c.electionKey = electionName;
 
         elections[electionName].candidates.push(msg.sender);
-        //elections[electionName].candidateListPointers[msg.sender] = elections[electionName].candidates.length - 1;
-        candidateListPointers2[electionName][msg.sender] = elections[electionName].candidates.length - 1;
+        candidateListPointers[electionName][msg.sender] = elections[electionName].candidates.length - 1;
 
         emit CandidateRegistered(candidateName, electionName);
 
@@ -106,8 +105,6 @@ contract Voting {
     function getNumberOfCandidates() public view returns(uint) {
         return candidateList.length;
     }
-    
-    //function getElectionCandidates(bytes32 electionName) public view returns(address[] candidateAddresses) {}
 
     function isCandidate(address candidateAddress) public view returns (bool isIndeed) {
         if(candidateList.length == 0) return false;
@@ -128,12 +125,10 @@ contract Voting {
 
         // Delete candidate reference from associated election; fetch election from candidate; apply same deletion steps as previously
         bytes32 electionName = candidates[candidateAddress].electionKey;
-        //rowToDelete = elections[electionName].candidateListPointers[candidateAddress];
-        rowToDelete = candidateListPointers2[electionName][candidateAddress];
+        rowToDelete = candidateListPointers[electionName][candidateAddress];
         keyToMove = elections[electionName].candidates[elections[electionName].candidates.length - 1];
         elections[electionName].candidates[rowToDelete] = keyToMove;
-        //elections[electionName].candidateListPointers[keyToMove] = rowToDelete;
-        candidateListPointers2[electionName][keyToMove] = rowToDelete;
+        candidateListPointers[electionName][keyToMove] = rowToDelete;
         elections[electionName].candidates.pop();
 
         emit CandidateDeleted(candidateName, electionName);
@@ -154,9 +149,8 @@ contract Voting {
 
         v.voterAddress = msg.sender;
         v.candidateKey = candidateAddress;
-        //v.hasVotedInElectionMapping[electionName] = true;
 
-        hasVotedInElectionMapping2[msg.sender][electionName] = true;
+        hasVotedInElectionMapping[msg.sender][electionName] = true;
 
         candidates[candidateAddress].votes.push(msg.sender);
         candidates[candidateAddress].voteCount++;
@@ -167,7 +161,6 @@ contract Voting {
     }
 
     function hasVoted(bytes32 electionName) public view returns (bool hasIndeed) {
-        //return votes[msg.sender].hasVotedInElectionMapping[electionName];
-        return hasVotedInElectionMapping2[msg.sender][electionName];
+        return hasVotedInElectionMapping[msg.sender][electionName];
     }
 }
