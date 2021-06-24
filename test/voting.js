@@ -347,7 +347,6 @@ contract("Voting", (accounts) => {
       assert.equal(err.reason, "Your vote was already registered in that election.");
     });
 
-
     describe("Logs", async () => {
       it("emits VoteRegistered with corret arguments", async () => {
         await deploy();

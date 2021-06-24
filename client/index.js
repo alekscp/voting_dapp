@@ -49,17 +49,17 @@ const initApp = async () => {
   $createElection.addEventListener("submit", (e) => {
     e.preventDefault();
 
-    const electionName = web3.utils.asciiToHex(document.getElementById("electionName").value)
-    const electionProposal = document.getElementById("electionProposal").value
-    const registrationDeadline = document.getElementById("registrationDeadline").value
-    const votingDeadline = document.getElementById("votingDeadline").value
-    const electionDeadline = document.getElementById("endingTime").value
+    const electionName = web3.utils.asciiToHex(document.getElementById("electionName").value);
+    const electionProposal = document.getElementById("electionProposal").value;
+    const registrationDeadline = document.getElementById("registrationDeadline").value;
+    const votingDeadline = document.getElementById("votingDeadline").value;
+    const electionDeadline = document.getElementById("endingTime").value;
 
     voting.methods
       .createElection(electionName, electionProposal, registrationDeadline, votingDeadline, electionDeadline)
       .send({ from: accounts[0] })
       .on("receipt", (receipt) => {
-        console.log(receipt)
+        console.log(receipt);
         const electionName = receipt.events.ElectionCreated.returnValues.electionName;
         displayElection(electionName);
       });
@@ -76,13 +76,13 @@ const loadElections = async () => {
 };
 
 const loadCandidates = async () => {
-  const numberOfCandidates = await voting.methods.getNumberOfCandidates().call({ from: accounts[0] })
+  const numberOfCandidates = await voting.methods.getNumberOfCandidates().call({ from: accounts[0] });
 
   for (let i = 0; i < numberOfCandidates; i++) {
-    const candidateAddress = await voting.methods.candidateList(i).call({ from: accounts[0] })
-    const candidate = await voting.methods.candidates(candidateAddress).call({ from: accounts[0] })
+    const candidateAddress = await voting.methods.candidateList(i).call({ from: accounts[0] });
+    const candidate = await voting.methods.candidates(candidateAddress).call({ from: accounts[0] });
 
-    await displayCandidate(candidate.electionKey, candidate.name, candidateAddress)
+    await displayCandidate(candidate.electionKey, candidate.name, candidateAddress);
   }
 };
 
@@ -127,15 +127,14 @@ const displayElection = (electionName) => {
 
       const $electionCountdown = $clone.querySelector("#cardElectionCountdown-" + electionName);
       appendCountdownTimerFor(election.endingTime, $electionCountdown);
-      $electionCountdown.addEventListener("electionOver", () => { displayElectionResults(electionName) })
+      $electionCountdown.addEventListener("electionOver", () => {
+        displayElectionResults(electionName);
+      });
 
       const $cardRegisterCandidate = $clone.querySelector("#cardRegisterCandidate-" + electionName);
-      $cardRegisterCandidate.addEventListener(
-        "click",
-        () => {
-          registerCandidate(electionName);
-        }
-      );
+      $cardRegisterCandidate.addEventListener("click", () => {
+        registerCandidate(electionName);
+      });
 
       // NOTE: Weird behaviour on the UI versus appendChild()
       $elections.prepend($clone);
@@ -143,52 +142,52 @@ const displayElection = (electionName) => {
 };
 
 const displayElectionResults = async (electionName) => {
-  const $ul = document.getElementById("cardElectionCandidateList-" + electionName)
-  const $as = $ul.getElementsByTagName("a")
-  const $ulClone = $ul.cloneNode(false)
+  const $ul = document.getElementById("cardElectionCandidateList-" + electionName);
+  const $as = $ul.getElementsByTagName("a");
+  const $ulClone = $ul.cloneNode(false);
 
-  const lis = []
+  const lis = [];
   for (const $a of $as) {
-    const candidateAddress = $a.firstElementChild.id.match(/cardCandidateName-(.*)/)[1]
-    const candidate = await voting.methods.candidates(candidateAddress).call({ from: accounts[0] })
-    const voteCount = candidate.voteCount
+    const candidateAddress = $a.firstElementChild.id.match(/cardCandidateName-(.*)/)[1];
+    const candidate = await voting.methods.candidates(candidateAddress).call({ from: accounts[0] });
+    const voteCount = candidate.voteCount;
 
-    $a.innerHTML += `<span class="badge rounded-pill bg-info text-dark">${voteCount} votes</span>`
+    $a.innerHTML += `<span class="badge rounded-pill bg-info text-dark">${voteCount} votes</span>`;
 
-    lis.push({ element: $a, voteCount: parseInt(voteCount) })
+    lis.push({ element: $a, voteCount: parseInt(voteCount) });
   }
 
   lis.sort((a, b) => {
-    return b.voteCount - a.voteCount
-  })
+    return b.voteCount - a.voteCount;
+  });
 
   for (const item of lis) {
-    $ulClone.appendChild(item.element)
+    $ulClone.appendChild(item.element);
   }
 
-  $ul.parentNode.replaceChild($ulClone, $ul)
+  $ul.parentNode.replaceChild($ulClone, $ul);
 };
 
 const displayCandidate = async (electionName, candidateName, candidateAddress) => {
-  const $candidateList = document.getElementById("cardElectionCandidateList-" + electionName)
+  const $candidateList = document.getElementById("cardElectionCandidateList-" + electionName);
   const $candidateTemplate = document.getElementById("cardCandidateTemplate");
-  const $candidateClone = $candidateTemplate.content.cloneNode(true)
+  const $candidateClone = $candidateTemplate.content.cloneNode(true);
 
-  const $candidateName = $candidateClone.querySelector("#cardCandidateName-")
-  $candidateName.id = $candidateName.id + candidateAddress
+  const $candidateName = $candidateClone.querySelector("#cardCandidateName-");
+  $candidateName.id = $candidateName.id + candidateAddress;
 
-  const $candidateVoteButton = $candidateClone.querySelector("#cardVoteForCandidate-")
-  $candidateVoteButton.id = $candidateVoteButton.id + candidateAddress
+  const $candidateVoteButton = $candidateClone.querySelector("#cardVoteForCandidate-");
+  $candidateVoteButton.id = $candidateVoteButton.id + candidateAddress;
 
-  const $candidateRemoveButton = $candidateClone.querySelector("#cardRemoveCandidate-")
-  $candidateRemoveButton.id = $candidateRemoveButton.id + candidateAddress
+  const $candidateRemoveButton = $candidateClone.querySelector("#cardRemoveCandidate-");
+  $candidateRemoveButton.id = $candidateRemoveButton.id + candidateAddress;
 
-  $candidateName.textContent = web3.utils.hexToUtf8(candidateName)
+  $candidateName.textContent = web3.utils.hexToUtf8(candidateName);
 
-  $candidateVoteButton.addEventListener("click", () => voteForCandidate(electionName, candidateAddress))
-  $candidateRemoveButton.addEventListener("click", () => removeCandidate(candidateAddress))
+  $candidateVoteButton.addEventListener("click", () => voteForCandidate(electionName, candidateAddress));
+  $candidateRemoveButton.addEventListener("click", () => removeCandidate(candidateAddress));
 
-  $candidateList.appendChild($candidateClone)
+  $candidateList.appendChild($candidateClone);
 };
 
 const registerCandidate = (electionName) => {
@@ -196,33 +195,37 @@ const registerCandidate = (electionName) => {
   const $registerCandidateName = document.getElementById("registerCandidateName");
   const $modal = document.getElementById("registerCandidateModal");
 
-  const controller = new AbortController()
-  $registerCandidateSubmitButton.addEventListener("click", (e) => {
-    const candidateName = $registerCandidateName.value;
+  const controller = new AbortController();
+  $registerCandidateSubmitButton.addEventListener(
+    "click",
+    (e) => {
+      const candidateName = $registerCandidateName.value;
 
-    if (!candidateName) return alert("Name cannot be empty");
+      if (!candidateName) return alert("Name cannot be empty");
 
-    voting.methods
-      .registerCandidate(electionName, web3.utils.utf8ToHex(candidateName))
-      .send({ from: accounts[0] })
-      .on("receipt", async (receipt) => {
-        console.log(receipt);
-        await displayCandidate(electionName, web3.utils.utf8ToHex(candidateName), receipt.from)
-        const event = parseEvent(receipt)
-        showAlert(
-          ALERT_MAPPINGS.info,
-          `Candidate ${web3.utils.hexToUtf8(event.candidateName)} registered to ${web3.utils.hexToUtf8(event.electionName)}`
-        )
-        $registerCandidateName.value = ""
-      })
-      .on("error", (error, receipt) => {
-        console.log(error);
-        showAlert(ALERT_MAPPINGS.error, parseErrorMessage(error))
-        $registerCandidateName.value = ""
-      });
+      voting.methods
+        .registerCandidate(electionName, web3.utils.utf8ToHex(candidateName))
+        .send({ from: accounts[0] })
+        .on("receipt", async (receipt) => {
+          console.log(receipt);
+          await displayCandidate(electionName, web3.utils.utf8ToHex(candidateName), receipt.from);
+          const event = parseEvent(receipt);
+          showAlert(
+            ALERT_MAPPINGS.info,
+            `Candidate ${web3.utils.hexToUtf8(event.candidateName)} registered to ${web3.utils.hexToUtf8(
+              event.electionName
+            )}`
+          );
+          $registerCandidateName.value = "";
+        })
+        .on("error", (error, receipt) => {
+          console.log(error);
+          showAlert(ALERT_MAPPINGS.error, parseErrorMessage(error));
+          $registerCandidateName.value = "";
+        });
 
-    controller.abort()
-  },
+      controller.abort();
+    },
     { signal: controller.signal }
   );
 };
@@ -232,15 +235,15 @@ const voteForCandidate = async (electionName, candidateAddress) => {
     .vote(electionName, candidateAddress)
     .send({ from: accounts[0] })
     .on("receipt", (receipt) => {
-      const event = parseEvent(receipt)
+      const event = parseEvent(receipt);
       showAlert(
         ALERT_MAPPINGS.info,
         `${web3.utils.hexToUtf8(event.voter)} just voted in ${web3.utils.hexToUtf8(event.electionName)}`
-      )
+      );
     })
     .on("error", (error, receipt) => {
-      showAlert(ALERT_MAPPINGS.error, parseErrorMessage(error))
-    })
+      showAlert(ALERT_MAPPINGS.error, parseErrorMessage(error));
+    });
 };
 
 const removeCandidate = async (candidateAddress) => {
@@ -248,15 +251,17 @@ const removeCandidate = async (candidateAddress) => {
     .deleteCandidate(candidateAddress)
     .send({ from: accounts[0] })
     .on("receipt", (receipt) => {
-      const event = parseEvent(receipt)
+      const event = parseEvent(receipt);
       showAlert(
         ALERT_MAPPINGS.info,
-        `Candidate ${web3.utils.hexToUtf8(event.candidateName)} removed from ${web3.utils.hexToUtf8(event.electionName)}`
-      )
+        `Candidate ${web3.utils.hexToUtf8(event.candidateName)} removed from ${web3.utils.hexToUtf8(
+          event.electionName
+        )}`
+      );
     })
     .on("error", (error, receipt) => {
-      showAlert(ALERT_MAPPINGS.error, parseErrorMessage(error))
-    })
+      showAlert(ALERT_MAPPINGS.error, parseErrorMessage(error));
+    });
 };
 
 const appendCountdownTimerFor = (countDownTo, el) => {
@@ -275,42 +280,42 @@ const appendCountdownTimerFor = (countDownTo, el) => {
     el.innerHTML = days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
 
     if (timeLeft < 0) {
-      const event = new Event("electionOver")
+      const event = new Event("electionOver");
       clearInterval(interval);
       el.innerHTML = "OVER";
-      el.dispatchEvent(event)
+      el.dispatchEvent(event);
     }
   }, 1000);
 };
 
 const showAlert = (level, message) => {
-  const $alert = document.getElementById("alertArea")
+  const $alert = document.getElementById("alertArea");
 
   const elements = `
     <div class="alert alert-${level} alert-dismissible fade show" role="alert">
       <strong>Mamma Mia!</strong> ${message}
       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-  `
+  `;
 
-  $alert.innerHTML = elements
+  $alert.innerHTML = elements;
 };
 
 const parseErrorMessage = (error) => {
-  const regex = new RegExp(/(?<=\')(.*)(?=\')/gm)
-  const str = error.message
-  const json = JSON.parse(str.match(regex))
-  const data = json.value.data.data
-  const lookupKey = Object.keys(data)[0]
+  const regex = new RegExp(/(?<=\')(.*)(?=\')/gm);
+  const str = error.message;
+  const json = JSON.parse(str.match(regex));
+  const data = json.value.data.data;
+  const lookupKey = Object.keys(data)[0];
 
-  return data[lookupKey].reason
+  return data[lookupKey].reason;
 };
 
 const parseEvent = (receipt) => {
-  const eventObj = receipt.events
-  const eventKey = Object.keys(eventObj)[0]
+  const eventObj = receipt.events;
+  const eventKey = Object.keys(eventObj)[0];
 
-  return eventObj[eventKey].returnValues
+  return eventObj[eventKey].returnValues;
 };
 
 const updateAccounts = async (acc) => {
@@ -326,7 +331,6 @@ const getRandomInt = (min, max) => {
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
 };
-
 
 document.addEventListener("DOMContentLoaded", () => {
   initWeb3()
