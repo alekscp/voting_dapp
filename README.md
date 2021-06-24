@@ -2,7 +2,7 @@
 
 Simple pet project to get my hands dirty with the Ethereum/Web3 stack
 
-![Voting Dapp Demo](https://raw.githubusercontent.com/alekscp/voting_dapp/main/voting_dapp_demo.gif)
+![Voting Dapp Demo](./voting_dapp_demo.gif)
 
 ### Dependencies
 - [nodeJS](https://nodejs.org/en/)
