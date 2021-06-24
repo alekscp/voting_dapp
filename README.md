@@ -38,3 +38,5 @@ Run tests
 ```
 truffle test
 ```
+
+Visit `localhost:8080`
